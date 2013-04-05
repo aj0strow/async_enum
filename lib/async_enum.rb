@@ -8,15 +8,42 @@ class Enumerator
       @enum = enum
     end
     
+    def to_a
+      @enum.to_a
+    end
     
-    
+    def sync
+      @enum
+    end
+        
     def each
       raise_error('each') unless block_given?
-      threads = @enum.map do |item|
-        Thread.new{ yield item }
+      
+      threads = @enum.map do |*args|
+        Thread.new{ yield(*args) }
       end
       threads.each(&:join)
-      @enum
+      self
+    end
+    
+    def map
+      raise_error('map') unless block_given?
+      
+      outs = []
+      threads = @enum.with_index.map do |item, index|
+        Thread.new{ outs[index] = yield(item) }
+      end
+      threads.each(&:join)
+      outs
+    end
+    
+    def with_index(&block)
+      @enum = @enum.with_index      
+      if block_given?
+        each(&block)
+      else
+        self
+      end
     end
     
     private

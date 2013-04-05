@@ -1,6 +1,6 @@
 class Enumerator
   
-  class Async 
+  class Async < Enumerator
     
   end
   

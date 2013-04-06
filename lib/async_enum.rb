@@ -1,5 +1,4 @@
 class Enumerator
-  
   class Async < Enumerator
     
     MAX_THREAD_COUNT = 10
@@ -63,5 +62,4 @@ class Enumerator
     end
     
   end
-  
 end

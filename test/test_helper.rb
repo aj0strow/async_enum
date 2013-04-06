@@ -1,4 +1,5 @@
 require 'minitest/autorun'
+require 'minitest/benchmark'
 require 'async_enum'
 
 

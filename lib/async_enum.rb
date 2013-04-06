@@ -1,9 +1,15 @@
 require_relative './async_enum/enumerator_async'
 
-class Enumerator
+module Enumerable
   
   def async
-    Enumerator::Async.new(self)
+    enum = case self
+    when Enumerator
+      self
+    else
+      self.each
+    end
+    Enumerator::Async.new(enum)
   end
   
 end

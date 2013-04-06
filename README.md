@@ -56,9 +56,28 @@ Async methods can be chained just like tipically enumerator methods:
 enum.async.each{ sleep(0.1) }.each{ sleep(0.1) }
 ```
 
+#### How to use it
+
+The method `Enumerable#async` was added so that every collection can be processed in parallel:
+
+```
+[ 0, 1, 2 ].async.each{ |i| puts i }
+(0..2).async.map(&:to_i)
+
+# or chain to your heart's content
+
+(0..5).reject(&:even?).reverse.async.with_index.map{ |x, index| x + index }
+```
+
 #### Installation
 
-It'll be a gem
+Install it (in the near future)
+
+`$ gem install async_enum`
+
+And require it
+
+`require 'async_enum'`
 
 #### License
 

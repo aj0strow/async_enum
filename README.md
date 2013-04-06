@@ -44,10 +44,16 @@ Every operation on the async enumerator affects the contained enumerator in the 
 
 ```
 enum.with_index.to_a
-# => [ 'a', 'b', 'c' ... ]
+# => [ [ 'a', 0 ], [ 'b', 1], [ 'c', 2 ] ... ]
 
 enum.async.with_index.to_a
-# => [ 'a', 'b', 'c' ... ]
+# => [ [ 'a', 0 ], [ 'b', 1], [ 'c', 2 ] ... ]
+```
+
+Async methods can be chained just like tipically enumerator methods:
+
+```
+enum.async.each{ sleep(0.1) }.each{ sleep(0.1) }
 ```
 
 #### Installation

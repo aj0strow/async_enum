@@ -27,7 +27,7 @@ The implementation was based on `Enumerable#lazy` introduced with Ruby 2.0. `Enu
 ```ruby
 enum = ('a'..'z').each
 
-# these are equivalent
+# the following are equivalent
 
 Enumerator::Async.new(enum)
 enum.async
@@ -44,10 +44,10 @@ Every operation on the async enumerator affects the contained enumerator in the 
 
 ```ruby
 enum.with_index.to_a
-# => [ [ 'a', 0 ], [ 'b', 1], [ 'c', 2 ] ... ]
+# => [ ['a', 0], ['b', 1], ['c', 2] ... ]
 
 enum.async.with_index.to_a
-# => [ [ 'a', 0 ], [ 'b', 1], [ 'c', 2 ] ... ]
+# => [ ['a', 0], ['b', 1], ['c', 2] ... ]
 ```
 
 Async methods can be chained just like tipically enumerator methods:

@@ -4,7 +4,7 @@ Inspired by Enumerable#lazy coupled with Enumerator::Lazy, and the Async.js libr
 
 #### Runs In Parallel
 
-```
+```ruby
 require 'benchmark'
 
 sync = Benchmark.measure do
@@ -24,7 +24,7 @@ puts sync, async
 
 The implementation was based on `Enumerable#lazy` introduced with Ruby 2.0. `Enumerator::Async` follows a similar approach, where the Enumerator is passed into the constructor. 
 
-```
+```ruby
 enum = ('a'..'z').each
 
 # these are equivalent
@@ -35,14 +35,14 @@ enum.async
 
 To get the enumerator back from the async enumerator, simply call `sync` like so:
 
-```
+```ruby
 enum.async.sync == enum
 # => true
 ```
 
 Every operation on the async enumerator affects the contained enumerator in the same way. For instance:
 
-```
+```ruby
 enum.with_index.to_a
 # => [ [ 'a', 0 ], [ 'b', 1], [ 'c', 2 ] ... ]
 
@@ -52,7 +52,7 @@ enum.async.with_index.to_a
 
 Async methods can be chained just like tipically enumerator methods:
 
-```
+```ruby
 enum.async.each{ sleep(0.1) }.each{ sleep(0.1) }
 ```
 
@@ -60,7 +60,7 @@ enum.async.each{ sleep(0.1) }.each{ sleep(0.1) }
 
 The method `Enumerable#async` was added so that every collection can be processed in parallel:
 
-```
+```ruby
 [ 0, 1, 2 ].async.each{ |i| puts i }
 (0..2).async.map(&:to_i)
 

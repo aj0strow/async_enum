@@ -25,5 +25,10 @@ class DefinitionsTest < Test
     end
   end
   
+  test 'enumerator#async exists' do
+    assert_includes Enumerator.instance_methods(false), :async
+    assert 5.times.respond_to?(:async)
+  end
+  
   
 end

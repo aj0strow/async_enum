@@ -19,7 +19,7 @@ class DefinitionsTest < Test
     assert_equal (1..5).to_a, enum.instance_variable_get('@enum').to_a
   end
     
-  %w(to_a sync each map with_index).each do |method|
+  %w(to_a sync each map with_index with_object).each do |method|
     test "enumerator async responds to #{method}" do
       assert_includes @methods, method.to_sym
     end

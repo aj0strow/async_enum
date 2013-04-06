@@ -29,18 +29,28 @@ class Enumerator
     def map
       raise_error('map') unless block_given?
       
-      outs = []
-      threads = @enum.with_index.map do |item, index|
-        Thread.new{ outs[index] = yield(item) }
+      outs = []; enum = @enum
+      with_index do |item, index|
+        outs[index] = yield(item)
       end
-      threads.each(&:join)
+      @enum = enum
       outs
     end
     
     def with_index(&block)
-      @enum = @enum.with_index      
+      @enum = @enum.with_index
       if block_given?
         each(&block)
+      else
+        self
+      end
+    end
+    
+    def with_object(obj)
+      @enum = @enum.with_object(obj)
+      if block_given?
+        each{ |elem, o| yield(elem, o) }
+        obj
       else
         self
       end

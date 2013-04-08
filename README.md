@@ -79,6 +79,19 @@ To limit the thread pool size, you can pass in an optional parameter to `async`.
 end
 ```
 
+#### Preventing race conditions
+
+When programming concurrently, some nasty bugs can come up due to the fact that some operations aren't atomic. For instance, incrementing a variable like so `x += 1` will not necessarily work. To provide easy locking, I added a method Kernel#safely that takes a block to be executed synchronously. 
+
+```ruby
+count = 0
+('a'..'z').async.each do
+  safely{ count += 1 }
+end
+count
+# => 26
+```
+
 #### Installation
 
 Install it (in the near future)

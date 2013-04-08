@@ -2,6 +2,8 @@
 
 Inspired by Enumerable#lazy coupled with Enumerator::Lazy, and the Async.js library, I thought it would be cool to have syntax like `urls.async.map{ |url| http_get(url) }`.
 
+![](https://fbcdn-sphotos-b-a.akamaihd.net/hphotos-ak-prn1/554187_10151609082562269_1115589261_n.jpg)
+
 #### Runs In Parallel
 
 ```ruby

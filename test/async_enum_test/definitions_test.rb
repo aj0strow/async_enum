@@ -18,6 +18,11 @@ class DefinitionsTest < Test
     enum = Enumerator::Async.new(1..5)
     assert_equal (1..5).to_a, enum.instance_variable_get('@enum').to_a
   end
+  
+  test 'enumerator holds onto pool_size' do
+    enum = Enumerator::Async.new(1..5, 5)
+    assert_equal 5, enum.instance_variable_get('@pool_size')
+  end
     
   %w(to_a sync each map with_index with_object).each do |method|
     test "enumerator async responds to #{method}" do

@@ -1,10 +1,15 @@
 class Enumerator
   class Async < Enumerator
     
-    MAX_THREAD_COUNT = 10
+    @semaphore = Mutex.new
     
-    def initialize(enum)
+    class << self
+      attr_reader :semaphore
+    end
+    
+    def initialize(enum, pool_size = nil)
       @enum = enum
+      @pool_size = pool_size
     end
     
     def to_a
@@ -15,25 +20,15 @@ class Enumerator
       @enum
     end
         
-    def each
+    def each(&block)
       raise_error('each') unless block_given?
       
-      threads = @enum.map do |*args|
-        Thread.new{ yield(*args) }
+      if @pool_size
+        rated_each(&block)
+      else
+        default_each(&block)
       end
-      threads.each(&:join)
       self
-    end
-    
-    def map
-      raise_error('map') unless block_given?
-      
-      outs = []; enum = @enum
-      with_index do |item, index|
-        outs[index] = yield(item)
-      end
-      @enum = enum
-      outs
     end
     
     def with_index(&block)
@@ -45,6 +40,18 @@ class Enumerator
       end
     end
     
+    def map
+      raise_error('map') unless block_given?
+      
+      outs = []
+      enum = @enum
+      with_index do |item, index|
+        outs[index] = yield(item)
+      end
+      @enum = enum
+      outs
+    end
+    
     def with_object(obj)
       @enum = @enum.with_object(obj)
       if block_given?
@@ -54,8 +61,25 @@ class Enumerator
         self
       end
     end
-    
+
     private
+    
+    def default_each
+      threads = @enum.map do |*args|
+        Thread.new{ yield(*args) }
+      end
+      threads.each(&:join)
+    end
+    
+    def rated_each
+      threads = @pool_size.times.map do
+        Thread.new do
+          loop{ yield(* @enum.next) }
+        end
+      end
+      threads.each(&:join)
+      @enum.rewind
+    end
     
     def raise_error(method)
       raise ArgumentError, "tried to call async #{method} without a block"

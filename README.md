@@ -69,6 +69,16 @@ The method `Enumerable#async` was added so that every collection can be processe
 (0..5).reject(&:even?).reverse.async.with_index.map{ |x, index| x + index }
 ```
 
+#### Limiting thread pool size
+
+To limit the thread pool size, you can pass in an optional parameter to `async`. Suppose for performance reasons you want to process at most 4 elements concurrently:
+
+```ruby
+(0..100).async(4).each do
+	# use bandwith
+end
+```
+
 #### Installation
 
 Install it (in the near future)

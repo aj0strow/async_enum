@@ -4,7 +4,6 @@ class TestEnumeratorAsync < Test
   
   setup do
     @enum = Enumerator::Async.new( (1..5).each )
-    @semaphore = Mutex.new
   end
   
   test 'async to_a' do
@@ -22,7 +21,7 @@ class TestEnumeratorAsync < Test
   test 'async each' do
     sum = 0
     @enum.each do |i|
-      @semaphore.synchronize{ sum += i }
+      safely{ sum += i }
     end
     assert_equal (1..5).reduce(:+), sum
   end
@@ -32,7 +31,7 @@ class TestEnumeratorAsync < Test
     enum = Enumerator::Async.new( ranges.each )
     sums = Hash.new(0)
     enum.each do |a, b, c|
-      @semaphore.synchronize do 
+      safely do
         sums[a] += a
         sums[b] += b
         sums[c] += c
@@ -51,7 +50,7 @@ class TestEnumeratorAsync < Test
   test 'async with_index' do
     s = ''
     @enum.with_index do |x, i|
-      @semaphore.synchronize{ s += "#{ x - i }" }
+      safely{ s += "#{ x - i }" }
     end 
     assert_equal '11111', s
   end

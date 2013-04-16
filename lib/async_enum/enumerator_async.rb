@@ -1,10 +1,12 @@
 class Enumerator
   class Async < Enumerator
     
-    @semaphore = Mutex.new
+    @semaphores = Hash.new do |locks, key| 
+      locks[key] = Mutex.new 
+    end
     
     class << self
-      attr_reader :semaphore
+      attr_reader :semaphores
     end
     
     def initialize(enum, pool_size = nil)
@@ -20,67 +22,66 @@ class Enumerator
       @enum
     end
         
-    def each(&block)
+    def each(&work)
       raise_error('each') unless block_given?
       
       if @pool_size
-        rated_each(&block)
+        threads = @pool_size.times.map do
+          Thread.new do
+            catch StopIteration do
+              loop{ yield *@enum.next }
+            end
+          end
+        end
+        threads.each(&:join)
+        @enum.rewind
       else
-        default_each(&block)
+        unlimited_threads(&work).each(&:join)
       end
       self
     end
     
-    def with_index(&block)
-      @enum = @enum.with_index
+    def with_index(start = 0, &work)
+      @enum = @enum.with_index(start)
       if block_given?
-        each(&block)
+        each(&work)
       else
         self
       end
     end
     
-    def map
-      raise_error('map') unless block_given?
-      
-      outs = []
-      enum = @enum
-      with_index do |item, index|
-        outs[index] = yield(item)
-      end
-      @enum = enum
-      outs
-    end
-    
-    def with_object(obj)
+    def with_object(obj, &work)
       @enum = @enum.with_object(obj)
       if block_given?
-        each{ |elem, o| yield(elem, o) }
+        each(&work)
         obj
       else
         self
       end
     end
+    
+    def map(&work)
+      raise_error('map') unless block_given?
+      
+      if @pool_size
+        outs = []
+        with_index do |item, index|
+          outs[index] = yield item
+        end
+        outs
+      else
+        unlimited_threads(&work).map(&:value)
+      end
+    end
 
     private
     
-    def default_each
-      threads = @enum.map do |*args|
-        Thread.new{ yield(*args) }
+    def unlimited_threads
+      @enum.map do |*args|
+        Thread.new{ yield *args }
       end
-      threads.each(&:join)
     end
-    
-    def rated_each
-      threads = @pool_size.times.map do
-        Thread.new do
-          loop{ yield(* @enum.next) }
-        end
-      end
-      threads.each(&:join)
-      @enum.rewind
-    end
-    
+
     def raise_error(method)
       raise ArgumentError, "tried to call async #{method} without a block"
     end

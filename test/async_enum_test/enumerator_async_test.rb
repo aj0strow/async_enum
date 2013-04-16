@@ -80,6 +80,11 @@ class TestEnumeratorAsync < Test
     assert_equal '1 2 3 4 5', strs.join(' ')
   end
   
+  test 'async map keeps order' do
+    strs = @enum.map{ |i| sleep rand; i.to_s }
+    assert_equal '1 2 3 4 5', strs.join(' ')
+  end
+  
   
   
   

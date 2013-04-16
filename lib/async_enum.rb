@@ -8,7 +8,7 @@ module Enumerable
 end
 
 module Kernel
-  def safely(&block)
-    Enumerator::Async.semaphore.synchronize(&block)
+  def lock(key = :__default__, &block)
+    Enumerator::Async.semaphores[key].synchronize(&block)
   end
 end

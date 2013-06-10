@@ -93,17 +93,3 @@ end
 count
 # => 26
 ```
-
-#### Installation
-
-Install it (in the near future)
-
-`$ gem install async_enum`
-
-And require it
-
-`require 'async_enum'`
-
-#### License
-
-MIT

@@ -2,10 +2,6 @@ require 'test_helper'
 
 class ThreadPoolTest < Test
   
-  setup do
-    @enum = 5.times.async
-  end
-  
   test 'pools can speed things up' do
     default_start = Time.now
     500.times.async.each{ true }

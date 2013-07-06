@@ -1,5 +1,5 @@
 require 'benchmark'
-require_relative File.join('..', 'lib', 'async_enum')
+require 'async_enum'
 
 sync = Benchmark.measure do
 	5.times{ sleep 0.1 }

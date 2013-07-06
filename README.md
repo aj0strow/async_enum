@@ -108,4 +108,12 @@ To install it, add it to your gemfile:
 gem 'async_enum', github: 'aj0strow/async_enum'
 ```
 
+To run the demos, clone the project and run with the library included in the load path:
+
+```
+$ git clone git@github.com:aj0strow/async_enum
+$ cd async_enum
+$ ruby -I lib demos/sleep.rb 
+```
+
 Please report errors and contribute to improve things! **Disclaimer: I am not an expert at multithreading.** Quite the opposite in fact. 

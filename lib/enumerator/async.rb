@@ -11,6 +11,8 @@ class Enumerator
       def lock(key = :__default__, &thread_unsafe_block)
         @semaphores[key].synchronize(&thread_unsafe_block)
       end
+      
+      alias_method :evaluate, :instance_exec
     end
     
     def initialize(enum, pool_size = nil)
@@ -39,8 +41,8 @@ class Enumerator
       if @pool_size
         threads = @pool_size.times.map do
           Thread.new do
-            catch StopIteration do
-              loop{ evaluate(*@enum.next, &work) }
+            loop do
+              @enum.any? ? evaluate(*@enum.next, &work) : break
             end
           end
         end

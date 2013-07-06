@@ -10,7 +10,7 @@ class DefinitionsTest < Test
     assert_equal 'constant', defined?(Enumerator::Async)
   end
   
-  test 'enumerator async descends from enumerator' do
+  test 'enumerator async inherits from enumerator' do
     assert_includes Enumerator::Async.ancestors, Enumerator
   end
   
@@ -24,7 +24,7 @@ class DefinitionsTest < Test
     assert_equal 5, enum.instance_variable_get('@pool_size')
   end
     
-  %w(to_a sync each map with_index with_object).each do |method|
+  %w(to_a to_enum sync each map with_index with_object).each do |method|
     test "enumerator async responds to #{method}" do
       assert_includes @methods, method.to_sym
     end

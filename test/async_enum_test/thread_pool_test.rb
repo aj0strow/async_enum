@@ -1,17 +1,9 @@
 require 'test_helper'
 
-class TestEnumerable < Test
+class ThreadPoolTest < Test
   
   setup do
     @enum = 5.times.async
-  end
-  
-  test 'safely helper method' do
-    sum = 0
-    @enum.each do |i|
-      safely{ sum += i }
-    end
-    assert_equal sum, 5.times.reduce(:+)
   end
   
   test 'pools can speed things up' do

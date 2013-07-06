@@ -1,17 +1,22 @@
 class Enumerator
   class Async < Enumerator
     
-    @semaphores = Hash.new do |locks, key| 
-      locks[key] = Mutex.new 
-    end
-    
-    class << self
-      attr_reader :semaphores
+    class Lockset
+      def initialize
+        @semaphores = Hash.new do |locks, key| 
+          locks[key] = Mutex.new 
+        end
+      end
+      
+      def lock(key = :__default__, &thread_unsafe_block)
+        @semaphores[key].synchronize(&thread_unsafe_block)
+      end
     end
     
     def initialize(enum, pool_size = nil)
       @enum = enum
       @pool_size = pool_size
+      @lockset = Lockset.new
     end
     
     def to_a
@@ -21,6 +26,12 @@ class Enumerator
     def sync
       @enum
     end
+    
+    alias_method :to_enum, :sync
+    
+    def size
+      @enum.size
+    end
         
     def each(&work)
       raise_error('each') unless block_given?
@@ -29,7 +40,7 @@ class Enumerator
         threads = @pool_size.times.map do
           Thread.new do
             catch StopIteration do
-              loop{ yield *@enum.next }
+              loop{ evaluate(*@enum.next, &work) }
             end
           end
         end
@@ -53,8 +64,7 @@ class Enumerator
     def with_object(obj, &work)
       @enum = @enum.with_object(obj)
       if block_given?
-        each(&work)
-        obj
+        each(&work); obj
       else
         self
       end
@@ -66,7 +76,7 @@ class Enumerator
       if @pool_size
         outs = []
         with_index do |item, index|
-          outs[index] = yield item
+          outs[index] = evaluate(item, &work)
         end
         outs
       else
@@ -76,9 +86,13 @@ class Enumerator
 
     private
     
-    def unlimited_threads
+    def evaluate(*args, &work)
+      @lockset.instance_exec(*args, &work)
+    end
+    
+    def unlimited_threads(&work)
       @enum.map do |*args|
-        Thread.new{ yield *args }
+        Thread.new{ evaluate(*args, &work) }
       end
     end
 

@@ -35,7 +35,7 @@ Enumerator::Async.new(enum)
 enum.async
 ```
 
-To get the enumerator back from the async enumerator, simply call `sync` like so:
+To get the enumerator back from the async enumerator, simply call `sync` or `to_enum` like so:
 
 ```ruby
 enum.async.sync == enum
@@ -52,7 +52,7 @@ enum.async.with_index.to_a
 # => [ ['a', 0], ['b', 1], ['c', 2] ... ]
 ```
 
-Async methods can be chained just like tipically enumerator methods:
+Async methods can be chained just like tipical enumerator methods:
 
 ```ruby
 enum.async.each{ sleep(0.1) }.each{ sleep(0.1) }
@@ -73,7 +73,7 @@ The method `Enumerable#async` was added so that every collection can be processe
 
 #### Limiting thread pool size
 
-To limit the thread pool size, you can pass in an optional parameter to `async`. Suppose for performance reasons you want to process at most 4 elements concurrently:
+To limit the thread pool size, you can pass in an optional parameter to `async`. Suppose for performance reasons you want to use a maximum of 4 threads:
 
 ```ruby
 (0..100).async(4).each do
@@ -83,13 +83,29 @@ end
 
 #### Preventing race conditions
 
-When programming concurrently, some nasty bugs can come up due to the fact that some operations aren't atomic. For instance, incrementing a variable like so `x += 1` will not necessarily work. To provide easy locking, I added a method Kernel#safely that takes a block to be executed synchronously. 
+When programming concurrently, nasty bugs can come up because some operations aren't atomic. For instance, incrementing a variable `x += 1` will not necessarily work as expected. To provide easy locking, there's a DSL-style `lock` method you can use in the block passed to the async enum. 
 
 ```ruby
 count = 0
 ('a'..'z').async.each do
-  safely{ count += 1 }
+  lock :count do
+    count += 1
+  end
 end
 count
 # => 26
 ```
+
+The name of the lock doesn't matter, but using the variable name helps make the code understandable. You should try to use 1 lock per thread-unsafe variable.
+
+## Notes
+
+To install it, add it to your gemfile:
+
+```
+# Gemfile
+
+gem 'async_enum', github: 'aj0strow/async_enum'
+```
+
+Please report errors and contribute to improve things! **Disclaimer: I am not an expert at multithreading.** Quite the opposite in fact. 

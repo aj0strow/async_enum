@@ -1,94 +1,101 @@
 require 'test_helper'
 
-class TestEnumeratorAsync < Test
+class EnumeratorAsyncTest < Test
   
   setup do
     @enum = Enumerator::Async.new( (1..5).each )
   end
   
-  test 'async to_a' do
+  test 'to_a' do
     assert_equal [1, 2, 3, 4, 5], @enum.to_a
   end
-  
-  test 'async sync' do
+
+  test 'sync returns enumerator' do
     refute @enum.sync.is_a?(Enumerator::Async)
   end
   
-  test 'async each no block' do
+  test 'to_enum alias of sync' do
+    assert_equal @enum.sync, @enum.to_enum
+  end
+  
+  test 'size' do
+    if Enumerator.instance_methods(false).include?(:size)
+      assert_equal 5, @enum.size
+    else
+      assert_raises(NoMethodError) { @enum.size }
+    end
+  end
+  
+  test 'each with no block' do
     assert_raises(ArgumentError) { @enum.each }
   end
   
-  test 'async each' do
-    sum = 0
+  test 'each' do
+    nums = []
     @enum.each do |i|
-      safely{ sum += i }
+      nums << i
     end
-    assert_equal (1..5).reduce(:+), sum
+    assert_equal @enum.to_a, nums.sort
   end
   
-  test 'async each with splatting' do
-    ranges = [ (1..3).to_a ] * 3
+  test 'each with splatting' do
+    ranges = [ ('a'..'c').to_a ] * 3
     enum = Enumerator::Async.new( ranges.each )
-    sums = Hash.new(0)
+    strs = []
     enum.each do |a, b, c|
-      safely do
-        sums[a] += a
-        sums[b] += b
-        sums[c] += c
-      end
+      strs << (a + b + c)
     end
-    assert_equal sums[1], 3
-    assert_equal sums[2], 6
-    assert_equal sums[3], 9
+    assert_equal %w(abc abc abc), strs
   end
   
-  test 'async with_index no block' do
+  test 'with_index no block' do
     pairs = @enum.with_index.to_a[0, 3]
     assert_equal [[1, 0], [2, 1], [3, 2]], pairs
   end
   
-  test 'async with_index' do
-    s = ''
+  test 'with_index' do
+    nums = []
     @enum.with_index do |x, i|
-      safely{ s += "#{ x - i }" }
+      nums << (x - i)
     end 
-    assert_equal '11111', s
+    assert_equal [1, 1, 1, 1, 1], nums
   end
   
-  test 'async with_object no block' do
+  test 'with_object no block' do
     h = {}
     pair = @enum.with_object(h).to_a.first
     assert_equal [ 1, h ], pair
   end
   
-  test 'async with_object' do
-    to_i = @enum.with_object({}) do |elem, h|
-      h[ elem.to_s ] = elem
+  test 'with_object' do
+    to_i = @enum.with_object({}) do |x, hash|
+      hash[ x.to_s ] = x
     end
     assert_equal to_i['3'], 3
   end
   
-  test 'async map no block' do
+  test 'map no block' do
     assert_raises(ArgumentError) { @enum.map }
   end
   
-  test 'async map' do
+  test 'map' do
     squares = @enum.map{ |i| i * i }
     assert_equal [1, 4, 9, 16, 25], squares
-    
-    strs = @enum.map(&:to_s)
-    assert_equal '1 2 3 4 5', strs.join(' ')
   end
   
-  test 'async map keeps order' do
+  test 'map keeps order' do
     strs = @enum.map{ |i| sleep rand; i.to_s }
     assert_equal '1 2 3 4 5', strs.join(' ')
   end
   
-  
-  
-  
-  
-  
-  
+  test 'lock in block' do
+    count = 0
+    1000.times.async(5).each do
+      lock :count do
+        count += 1
+      end
+    end
+    assert_equal 1000, count
+  end
+
 end

@@ -116,4 +116,6 @@ $ cd async_enum
 $ ruby -I lib demos/sleep.rb 
 ```
 
-Please report errors and contribute to improve things! **Disclaimer: I am not an expert at multithreading.** Quite the opposite in fact. 
+**Disclaimer**: I am not an expert at multithreading. Quite the opposite in fact.
+
+Please report errors and feel free to contribute and improve things!

@@ -13,6 +13,7 @@
 #********** ruby template********** 
 
 *.gem
+Gemfile.lock
 *.rbc
 .bundle
 .config

@@ -105,7 +105,7 @@ To install it, add it to your gemfile:
 ```
 # Gemfile
 
-gem 'async_enum', github: 'aj0strow/async_enum'
+gem 'async_enum'
 ```
 
 To run the demos, clone the project and run with the library included in the load path:

@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |s|
   s.name        = 'async_enum'
-  s.version     = '0.0.4'
+  s.version     = '0.0.5'
   s.authors     = %w(aj0strow)
   s.email       = 'alexander.ostrow@gmail.com'
   s.description = 'iterate over enumerable objects concurrently'

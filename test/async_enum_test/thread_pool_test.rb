@@ -21,4 +21,11 @@ class ThreadPoolTest < Test
     assert_equal [2, 3, 4, 5, 6, 7, 8, 9], vals
   end
   
+  test 'pools with hash' do
+    vals = {a: 1, b:2}.async(2).map do |k,v|
+      [k, v * 2]
+    end
+    assert_equal [[:a, 2], [:b, 4]], vals
+  end
+  
 end

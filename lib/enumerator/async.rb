@@ -1,3 +1,5 @@
+require 'thread'
+
 class Enumerator
   class Async < Enumerator
     
@@ -15,7 +17,17 @@ class Enumerator
       alias_method :evaluate, :instance_exec
     end
     
+    EOQ = Object.new
+    private_constant :EOQ
+    
     def initialize(enum, pool_size = nil)
+      if pool_size
+        unless 0<pool_size.to_i
+          raise ArgumentError, "pool_size is not valid integer: #{pool_size}"
+        end
+        pool_size = pool_size.to_i
+      end
+
       @enum = enum
       @pool_size = pool_size
       @lockset = Lockset.new
@@ -39,13 +51,26 @@ class Enumerator
       raise_error('each') unless block_given?
       
       if @pool_size
+        q = SizedQueue.new(@pool_size)
         threads = @pool_size.times.map do
           Thread.new do
             loop do
-              @enum.any? ? evaluate(*@enum.next, &work) : break
+              item = q.pop
+              item!=EOQ ? evaluate(item, &work) : break
             end
           end
         end
+
+        begin
+          loop do
+            q.push(@enum.next)
+          end
+        rescue StopIteration
+        end
+        @pool_size.times {
+          q.push(EOQ)
+        }
+
         threads.each(&:join)
         @enum.rewind
       else

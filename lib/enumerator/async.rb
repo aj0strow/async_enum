@@ -22,8 +22,9 @@ class Enumerator
     
     def initialize(enum, pool_size = nil)
       if pool_size
-        unless 0<pool_size.to_i
-          raise ArgumentError, "pool_size is not valid integer: #{pool_size}"
+        unless pool_size >= 1
+          message = "Thread pool size is invalid! Expected a positive integer but got: #{pool_size}"
+          raise ArgumentError, message
         end
         pool_size = pool_size.to_i
       end
@@ -51,25 +52,23 @@ class Enumerator
       raise_error('each') unless block_given?
       
       if @pool_size
-        q = SizedQueue.new(@pool_size)
+        queue = SizedQueue.new @pool_size
+        
         threads = @pool_size.times.map do
           Thread.new do
             loop do
-              item = q.pop
-              item!=EOQ ? evaluate(item, &work) : break
+              item = queue.pop
+              item != EOQ ? evaluate(item, &work) : break
             end
           end
         end
-
+        
         begin
-          loop do
-            q.push(@enum.next)
-          end
+          loop { queue.push @enum.next }
         rescue StopIteration
+        ensure
+          @pool_size.times { queue.push EOQ }
         end
-        @pool_size.times {
-          q.push(EOQ)
-        }
 
         threads.each(&:join)
         @enum.rewind
@@ -124,7 +123,7 @@ class Enumerator
     end
 
     def raise_error(method)
-      raise ArgumentError, "tried to call async #{method} without a block"
+      raise ArgumentError, "Tried to call async #{method} without a block"
     end
     
   end

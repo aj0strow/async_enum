@@ -22,10 +22,16 @@ class ThreadPoolTest < Test
   end
   
   test 'pools with hash' do
-    vals = {a: 1, b:2}.async(2).map do |k,v|
-      [k, v * 2]
+    values = { a: 1, b: 2 }.async(2).map do |key, value|
+      [key, value * 2]
     end
-    assert_equal [[:a, 2], [:b, 4]], vals
+    assert_equal [[:a, 2], [:b, 4]], values
+  end
+  
+  test 'doesnt throw fiber error' do
+    # implicitly will fail if error is raised
+    5.times.async(2).each { sleep 0.00001 }
+    assert true
   end
   
 end

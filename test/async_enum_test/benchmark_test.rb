@@ -8,5 +8,4 @@ class BenchmarkTest < Test
     end
   end
   
-  
 end

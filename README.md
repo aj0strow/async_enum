@@ -121,3 +121,7 @@ $ ruby -I lib demos/sleep.rb
 * Yoshida Tetsuya ([@yoshida-eth0](https://github.com/yoshida-eth0)) fixed the fiber error issue, and made the gem work with hashes.
 
 Please report errors and feel free to contribute and improve things!
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/aj0strow/async_enum/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

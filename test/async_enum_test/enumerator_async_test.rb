@@ -87,15 +87,5 @@ class EnumeratorAsyncTest < Test
     strs = @enum.map{ |i| sleep rand; i.to_s }
     assert_equal '1 2 3 4 5', strs.join(' ')
   end
-  
-  test 'lock in block' do
-    count = 0
-    1000.times.async(5).each do
-      lock :count do
-        count += 1
-      end
-    end
-    assert_equal 1000, count
-  end
 
 end

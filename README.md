@@ -83,12 +83,15 @@ end
 
 #### Preventing race conditions
 
-When programming concurrently, nasty bugs can come up because some operations aren't atomic. For instance, incrementing a variable `x += 1` will not necessarily work as expected. To provide easy locking, there's a DSL-style `lock` method you can use in the block passed to the async enum. 
+When programming concurrently, nasty bugs can come up because some operations aren't atomic. For instance, incrementing a variable `x += 1` will not necessarily work as expected. Use a lock when encountering these types of errors. 
 
 ```ruby
+require 'async_enum'
+
 count = 0
+mutex = Mutex.new
 ('a'..'z').async.each do
-  lock :count do
+  mutex.synchronize do
     count += 1
   end
 end
@@ -96,7 +99,7 @@ count
 # => 26
 ```
 
-The name of the lock doesn't matter, but using the variable name helps make the code understandable. You should try to use 1 lock per thread-unsafe variable.
+There used to be a lock DSL syntax, but it ruined using async_enum in scoped method calls. 
 
 ## Notes
 

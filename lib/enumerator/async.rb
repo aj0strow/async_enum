@@ -32,8 +32,8 @@ class Enumerator
     def each
       raise_error(:each) unless block_given?
       
-      queue = Queue.new
-        
+      queue = SizedQueue.new @pool_size
+              
       threads = @pool_size.times.map do
         Thread.new do
           loop do
@@ -60,13 +60,9 @@ class Enumerator
       block_given? ? each(&work) : self
     end
     
-    def with_object(obj, &work)
-      @enum = @enum.with_object(obj)
-      if block_given?
-        each(&work); obj
-      else
-        self
-      end
+    def with_object(object, &work)
+      @enum = @enum.with_object(object)
+      block_given? ? (each(&work) and object) : self
     end
     
     def map
